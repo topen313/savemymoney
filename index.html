@@ -2,11 +2,16 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>維恩財務指揮中心</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="財務指揮中心">
+    <title>Taffi 財務指揮中心 3.4</title>
+    
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+
     <style>
         /* --- 基礎設定 --- */
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f7f6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f7f6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; -webkit-tap-highlight-color: transparent; }
         h1 { text-align: center; color: #2c3e50; font-size: 1.6rem; margin-bottom: 5px; }
         .subtitle { text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 25px; }
         
@@ -28,51 +33,30 @@
         .checklist-text { flex-grow: 1; font-size: 1rem; }
         .checklist-amt { color: #555; font-weight: bold; }
 
-        /* --- Step 2: 支出盈餘區塊 (全新設計) --- */
-        .expense-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; /* 兩欄 */
-            gap: 15px; 
-            margin-bottom: 15px; 
-        }
+        /* --- Step 2: 支出盈餘區塊 --- */
+        .expense-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         
         .expense-card {
             background: #fff;
             border-radius: 12px;
             padding: 15px 10px;
             text-align: center;
-            border: 2px solid transparent; /* 預留邊框位置 */
+            border: 2px solid transparent;
             box-shadow: 0 2px 5px rgba(0,0,0,0.03);
             transition: transform 0.2s;
         }
-
         .expense-card:hover { transform: translateY(-2px); }
 
-        /* 各類別主題色 */
-        .theme-dog { background-color: #fff5f8; border-color: #f8bbd0; } /* 粉紅 */
-        .theme-food { background-color: #fff8e1; border-color: #ffe082; } /* 橘黃 */
-        .theme-shop { background-color: #f3e5f5; border-color: #e1bee7; } /* 紫色 */
-        .theme-ent { background-color: #e3f2fd; border-color: #90caf9; } /* 藍色 */
+        .theme-dog { background-color: #fff5f8; border-color: #f8bbd0; }
+        .theme-food { background-color: #fff8e1; border-color: #ffe082; }
+        .theme-shop { background-color: #f3e5f5; border-color: #e1bee7; }
+        .theme-ent { background-color: #e3f2fd; border-color: #90caf9; }
 
         .exp-icon { font-size: 1.5rem; display: block; margin-bottom: 5px; }
         .exp-title { font-weight: bold; font-size: 0.95rem; color: #444; margin-bottom: 8px; display: block; }
         
-        .expense-card input { 
-            background: white; 
-            border: 1px solid rgba(0,0,0,0.1); 
-            font-weight: bold;
-            color: #333;
-        }
-
-        .exp-budget { 
-            margin-top: 8px; 
-            font-size: 0.75rem; 
-            color: #777; 
-            background: rgba(255,255,255,0.6);
-            padding: 2px 6px;
-            border-radius: 4px;
-            display: inline-block;
-        }
+        .expense-card input { background: white; border: 1px solid rgba(0,0,0,0.1); font-weight: bold; color: #333; }
+        .exp-budget { margin-top: 8px; font-size: 0.75rem; color: #777; background: rgba(255,255,255,0.6); padding: 2px 6px; border-radius: 4px; display: inline-block; }
 
         button.calc-btn { width: 100%; background-color: #2c3e50; color: white; border: none; padding: 16px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         button.calc-btn:hover { background-color: #1a252f; transform: translateY(-1px); }
@@ -117,7 +101,7 @@
 </head>
 <body>
 
-    <h1>💰 財務指揮中心</h1>
+    <h1>💰 財務指揮中心 3.4</h1>
     <p class="subtitle">收入 -> 結算 -> 還債</p>
 
     <div class="card">
@@ -148,21 +132,18 @@
                 <input type="number" id="spentDog" placeholder="0">
                 <div class="exp-budget">預算 $2,950</div>
             </div>
-
             <div class="expense-card theme-food">
                 <span class="exp-icon">🍱</span>
                 <span class="exp-title">餐飲費用</span>
                 <input type="number" id="spentFood" placeholder="0">
                 <div class="exp-budget">預算 $8,000</div>
             </div>
-
             <div class="expense-card theme-shop">
                 <span class="exp-icon">🛍️</span>
                 <span class="exp-title">購物費用</span>
                 <input type="number" id="spentShop" placeholder="0">
                 <div class="exp-budget">預算 $1,700</div>
             </div>
-
             <div class="expense-card theme-ent">
                 <span class="exp-icon">🎬</span>
                 <span class="exp-title">其他娛樂</span>
@@ -259,14 +240,12 @@
     </div>
 
     <script>
-        // --- JS 邏輯完全保留 ---
-        
         window.onload = function() {
             loadAllData();
         };
 
         function loadAllData() {
-            const saved = localStorage.getItem('taffiFinanceV3_3'); // 升級存檔 Key，避免舊格式干擾
+            const saved = localStorage.getItem('taffiFinanceV3_4');
             if (saved) {
                 const data = JSON.parse(saved);
                 const inputs = document.querySelectorAll('input');
@@ -298,7 +277,7 @@
                     data[input.id] = (input.type === 'checkbox') ? input.checked : input.value;
                 }
             });
-            localStorage.setItem('taffiFinanceV3_3', JSON.stringify(data));
+            localStorage.setItem('taffiFinanceV3_4', JSON.stringify(data));
         }
 
         function refreshAll() {
@@ -357,7 +336,6 @@
             document.querySelectorAll('.bank-panel').forEach(panel => panel.classList.remove('active'));
             document.getElementById(bankName + '-panel').classList.add('active');
         }
-
     </script>
 </body>
 </html>
