@@ -63,9 +63,7 @@
 
     </style>
 </head>
-<body onload="loadDebtData()">
-
-    <h1>💰 財務指揮中心 3.0</h1>
+<body> <h1>💰 財務指揮中心 3.0</h1>
     <p class="subtitle">收入分配・債務追蹤・盈餘結算</p>
 
     <div class="card">
@@ -222,7 +220,63 @@
     </div>
 
     <script>
-        // --- 收入計算 ---
+        // --- 通用儲存功能 (新增功能) ---
+        // 當頁面載入時，自動還原所有資料
+        window.onload = function() {
+            loadAllData();
+        };
+
+        // 儲存所有欄位的資料
+        function saveAllData() {
+            const inputs = document.querySelectorAll('input'); // 抓取頁面所有輸入框
+            const data = {};
+            
+            inputs.forEach(input => {
+                if (input.id) { // 只儲存有 ID 的欄位
+                    if (input.type === 'checkbox') {
+                        data[input.id] = input.checked;
+                    } else {
+                        data[input.id] = input.value;
+                    }
+                }
+            });
+            
+            localStorage.setItem('taffiFinanceFullData', JSON.stringify(data));
+        }
+
+        // 讀取並填入資料
+        function loadAllData() {
+            const saved = localStorage.getItem('taffiFinanceFullData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                const inputs = document.querySelectorAll('input');
+                
+                inputs.forEach(input => {
+                    if (input.id && data.hasOwnProperty(input.id)) {
+                        if (input.type === 'checkbox') {
+                            input.checked = data[input.id];
+                        } else {
+                            input.value = data[input.id];
+                        }
+                    }
+                });
+
+                // 資料填入後，重新觸發計算，讓介面數字正確
+                calcTotalIncome();
+                updateDebt('cathay');
+                updateDebt('taishin');
+                updateDebt('fubon');
+            }
+
+            // 幫每一個輸入框加上監聽器，只要一動就儲存
+            const allInputs = document.querySelectorAll('input');
+            allInputs.forEach(input => {
+                input.addEventListener('input', saveAllData); // 打字時儲存
+                input.addEventListener('change', saveAllData); // 勾選或變更時儲存
+            });
+        }
+
+        // --- 收入計算 (維持原樣) ---
         function calcTotalIncome() {
             let base = Number(document.getElementById('salaryBase').value) || 0;
             let bonus = Number(document.getElementById('salaryBonus').value) || 0;
@@ -231,9 +285,7 @@
             document.getElementById('totalIncomeDisplay').innerText = "本月總收入：$" + total.toLocaleString();
         }
 
-        // --- 債務計算與自動儲存 ---
-        
-        // 更新單一銀行的債務
+        // --- 債務計算 (維持原樣，但移除了舊的個別存檔功能，改用全域存檔) ---
         function updateDebt(bank) {
             let totalDebt = Number(document.getElementById(bank + 'Total').value) || 0;
             let paid = 0;
@@ -245,45 +297,9 @@
 
             let remain = totalDebt - paid;
             document.getElementById(bank + 'Remain').innerText = "$" + remain.toLocaleString();
-
-            // 儲存資料到 LocalStorage
-            saveDebtData();
         }
 
-        // 儲存所有債務輸入框的資料
-        function saveDebtData() {
-            const banks = ['cathay', 'taishin', 'fubon'];
-            const data = {};
-            
-            banks.forEach(bank => {
-                data[bank + 'Total'] = document.getElementById(bank + 'Total').value;
-                for(let i=1; i<=6; i++) {
-                    data[bank + i] = document.getElementById(bank + i).value;
-                }
-            });
-            
-            localStorage.setItem('taffiDebtData', JSON.stringify(data));
-        }
-
-        // 載入資料 (頁面開啟時執行)
-        function loadDebtData() {
-            const saved = localStorage.getItem('taffiDebtData');
-            if (saved) {
-                const data = JSON.parse(saved);
-                const banks = ['cathay', 'taishin', 'fubon'];
-                
-                banks.forEach(bank => {
-                    if(data[bank + 'Total']) document.getElementById(bank + 'Total').value = data[bank + 'Total'];
-                    for(let i=1; i<=6; i++) {
-                        if(data[bank + i]) document.getElementById(bank + i).value = data[bank + i];
-                    }
-                    // 填完數字後，重新觸發計算顯示剩餘金額
-                    updateDebt(bank);
-                });
-            }
-        }
-
-        // --- 盈餘結算 ---
+        // --- 盈餘結算 (維持原樣) ---
         function calculate() {
             // 預算設定
             const budgetDog = 2950;
