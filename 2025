@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taffi 家的財務指揮中心</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f7f9fc; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #2c3e50; font-size: 1.5rem; margin-bottom: 5px; }
+        h2 { font-size: 1.1rem; color: #555; margin-top: 25px; border-bottom: 2px solid #ddd; padding-bottom: 5px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        /* 輸入框樣式 */
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
+        input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+        
+        /* 勾選清單樣式 */
+        .checklist-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px dashed #eee; }
+        .checklist-item:last-child { border-bottom: none; }
+        .checklist-item input { margin-right: 15px; transform: scale(1.3); }
+        .checklist-text { flex-grow: 1; }
+        .checklist-amt { color: #888; font-size: 0.9rem; }
+
+        /* 按鈕 */
+        button { width: 100%; background-color: #4a90e2; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: #357abd; }
+
+        /* 結果區 */
+        #resultArea { display: none; background-color: #e8f5e9; border: 2px solid #c8e6c9; }
+        .result-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1.1rem; }
+        .highlight { color: #2e7d32; font-weight: bold; }
+        .taffi-highlight { color: #d81b60; font-weight: bold; }
+        
+        .sub-note { font-size: 0.8rem; color: #666; margin-top: 5px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <h1>💰 月度財務指揮中心</h1>
+    <p style="text-align: center; color: #888; font-size: 0.9rem;">收入分配 & 盈餘結算系統</p>
+
+    <div class="card">
+        <h2>📅 Step 1：月初分配 (發薪日)</h2>
+        <div class="input-group">
+            <label>本月收入 (NT$)</label>
+            <input type="number" id="income" value="45000">
+        </div>
+
+        <p style="font-size: 0.9rem; color: #666;">請確認以下款項已轉出或扣款：</p>
+        
+        <div class="checklist-item">
+            <input type="checkbox" id="check1">
+            <div class="checklist-text">🏠 房貸 (給爸媽)</div>
+            <div class="checklist-amt">$15,000</div>
+        </div>
+        <div class="checklist-item">
+            <input type="checkbox" id="check2">
+            <div class="checklist-text">🏦 固定儲蓄 (旅遊/緊急/Taffi)</div>
+            <div class="checklist-amt">$12,000</div>
+        </div>
+        <div class="checklist-item">
+            <input type="checkbox" id="check3">
+            <div class="checklist-text">🛡️ 年度支出預備 (保險/保養)</div>
+            <div class="checklist-amt">$1,500</div>
+        </div>
+        <div class="checklist-item">
+            <input type="checkbox" id="check4">
+            <div class="checklist-text">📱 固定帳單 (手機/Gogoro)</div>
+            <div class="checklist-amt">$1,049</div>
+        </div>
+        <div class="checklist-item">
+            <input type="checkbox" id="check5">
+            <div class="checklist-text">💅 固定美甲/健身/iCloud</div>
+            <div class="checklist-amt">$2,250</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📉 Step 2：月底結算 (輸入實際花費)</h2>
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">打開你的記帳 App，填入這四項的「總支出」：</p>
+
+        <div class="input-group">
+            <label>🐶 狗狗支出 (預算 $2,950)</label>
+            <input type="number" id="spentDog" placeholder="填入實際花費">
+        </div>
+        
+        <div class="input-group">
+            <label>🍱 餐飲費用 (預算 $8,000)</label>
+            <input type="number" id="spentFood" placeholder="填入實際花費">
+        </div>
+
+        <div class="input-group">
+            <label>🛍️ 購物費用 (預算 $1,700)</label>
+            <input type="number" id="spentShop" placeholder="填入實際花費">
+        </div>
+
+        <div class="input-group">
+            <label>🎬 其他娛樂 (預算 $500)</label>
+            <input type="number" id="spentEnt" placeholder="填入實際花費">
+        </div>
+
+        <button onclick="calculate()">計算本月盈餘 🚀</button>
+    </div>
+
+    <div id="resultArea" class="card">
+        <h2 style="margin-top:0; border:none; text-align:center;">🎉 結算結果</h2>
+        
+        <div class="result-row">
+            <span>存入 Taffi 預備金：</span>
+            <span id="resTaffi" class="taffi-highlight">$0</span>
+        </div>
+        <div style="font-size: 0.8rem; color:#888; margin-bottom: 10px; text-align: right;">(來自狗狗預算剩餘)</div>
+
+        <div class="result-row">
+            <span>存入 緊急預備金：</span>
+            <span id="resEmergency" class="highlight">$0</span>
+        </div>
+        <div style="font-size: 0.8rem; color:#888; margin-bottom: 10px; text-align: right;">(來自餐飲/購物/娛樂剩餘)</div>
+
+        <hr>
+        <div class="result-row" style="font-size: 1.3rem; margin-top: 10px;">
+            <span>💰 本月總結餘：</span>
+            <span id="resTotal">$0</span>
+        </div>
+        <div class="sub-note">請記得將以上金額轉帳！</div>
+    </div>
+
+    <script>
+        function calculate() {
+            // 預算設定
+            const budgetDog = 2950;
+            const budgetFood = 8000;
+            const budgetShop = 1700;
+            const budgetEnt = 500;
+
+            // 取得輸入值 (若沒填則視為0)
+            let spentDog = Number(document.getElementById('spentDog').value) || 0;
+            let spentFood = Number(document.getElementById('spentFood').value) || 0;
+            let spentShop = Number(document.getElementById('spentShop').value) || 0;
+            let spentEnt = Number(document.getElementById('spentEnt').value) || 0;
+
+            // 計算剩餘
+            let leftDog = budgetDog - spentDog;
+            let leftFood = budgetFood - spentFood;
+            let leftShop = budgetShop - spentShop;
+            let leftEnt = budgetEnt - spentEnt;
+
+            // 邏輯：Taffi 的剩餘歸 Taffi，其他歸緊急金
+            // 若超支 (負數)，則視為 0 (或看你要不要從其他地方扣，目前設為不轉存)
+            
+            let toTaffi = leftDog > 0 ? leftDog : 0;
+            let toEmergency = (leftFood + leftShop + leftEnt); 
+            
+            // 若緊急金部分算出來是負的（代表生活費透支），顯示負數提醒
+            // 若希望不顯示負數，可改為: let toEmergency = (leftFood + leftShop + leftEnt) > 0 ? (...) : 0;
+
+            let totalSave = toTaffi + toEmergency;
+
+            // 顯示結果
+            document.getElementById('resTaffi').innerText = "$ " + toTaffi.toLocaleString();
+            document.getElementById('resEmergency').innerText = "$ " + toEmergency.toLocaleString();
+            document.getElementById('resTotal').innerText = "$ " + totalSave.toLocaleString();
+
+            // 顯示結果區塊
+            document.getElementById('resultArea').style.display = 'block';
+            
+            // 捲動到結果
+            document.getElementById('resultArea').scrollIntoView({behavior: "smooth"});
+        }
+    </script>
+</body>
+</html>
