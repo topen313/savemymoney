@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-title" content="維恩財務指揮中心">
     <title>維恩財務指揮中心</title>
     
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22white%22/><text x=%2250%22 y=%2250%22 font-size=%2270%22 text-anchor=%22middle%22 dy=%22.35em%22>💰</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%22 y=%2250%22 font-size=%2270%22 text-anchor=%22middle%22 dy=%22.35em%22>💰</text></svg>">
 
     <style>
         /* --- 基礎設定 --- */
@@ -22,6 +22,16 @@
         input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 1.1rem; box-sizing: border-box; text-align: center; transition: all 0.3s; background: #fafafa; }
         input[type="number"]:focus { border-color: #4a90e2; background: #fff; outline: none; box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1); }
         label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 5px; font-weight: bold; }
+
+        /* 新增：隱藏數字輸入框的上下箭頭 (Spin Buttons) */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield; /* Firefox */
+        }
 
         /* --- Step 1: 收入區塊 --- */
         .income-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
@@ -187,12 +197,12 @@
                 <input type="number" id="cathayTotal" placeholder="輸入總欠款">
             </div>
             <div class="months-grid">
-                <div class="month-box"><label>1月</label><input type="number" id="cathay1" placeholder="-"></div>
-                <div class="month-box"><label>2月</label><input type="number" id="cathay2" placeholder="-"></div>
-                <div class="month-box"><label>3月</label><input type="number" id="cathay3" placeholder="-"></div>
-                <div class="month-box"><label>4月</label><input type="number" id="cathay4" placeholder="-"></div>
-                <div class="month-box"><label>5月</label><input type="number" id="cathay5" placeholder="-"></div>
-                <div class="month-box"><label>6月</label><input type="number" id="cathay6" placeholder="-"></div>
+                <div class="month-box"><label>1月</label><input type="number" id="cathay1" placeholder="0"></div>
+                <div class="month-box"><label>2月</label><input type="number" id="cathay2" placeholder="0"></div>
+                <div class="month-box"><label>3月</label><input type="number" id="cathay3" placeholder="0"></div>
+                <div class="month-box"><label>4月</label><input type="number" id="cathay4" placeholder="0"></div>
+                <div class="month-box"><label>5月</label><input type="number" id="cathay5" placeholder="0"></div>
+                <div class="month-box"><label>6月</label><input type="number" id="cathay6" placeholder="0"></div>
             </div>
             <div class="remain-area">
                 <div class="remain-label">目前剩餘欠款</div>
@@ -206,12 +216,12 @@
                 <input type="number" id="taishinTotal" placeholder="輸入總欠款">
             </div>
             <div class="months-grid">
-                <div class="month-box"><label>1月</label><input type="number" id="taishin1" placeholder="-"></div>
-                <div class="month-box"><label>2月</label><input type="number" id="taishin2" placeholder="-"></div>
-                <div class="month-box"><label>3月</label><input type="number" id="taishin3" placeholder="-"></div>
-                <div class="month-box"><label>4月</label><input type="number" id="taishin4" placeholder="-"></div>
-                <div class="month-box"><label>5月</label><input type="number" id="taishin5" placeholder="-"></div>
-                <div class="month-box"><label>6月</label><input type="number" id="taishin6" placeholder="-"></div>
+                <div class="month-box"><label>1月</label><input type="number" id="taishin1" placeholder="0"></div>
+                <div class="month-box"><label>2月</label><input type="number" id="taishin2" placeholder="0"></div>
+                <div class="month-box"><label>3月</label><input type="number" id="taishin3" placeholder="0"></div>
+                <div class="month-box"><label>4月</label><input type="number" id="taishin4" placeholder="0"></div>
+                <div class="month-box"><label>5月</label><input type="number" id="taishin5" placeholder="0"></div>
+                <div class="month-box"><label>6月</label><input type="number" id="taishin6" placeholder="0"></div>
             </div>
             <div class="remain-area">
                 <div class="remain-label">目前剩餘欠款</div>
@@ -225,12 +235,12 @@
                 <input type="number" id="fubonTotal" placeholder="輸入總欠款">
             </div>
             <div class="months-grid">
-                <div class="month-box"><label>1月</label><input type="number" id="fubon1" placeholder="-"></div>
-                <div class="month-box"><label>2月</label><input type="number" id="fubon2" placeholder="-"></div>
-                <div class="month-box"><label>3月</label><input type="number" id="fubon3" placeholder="-"></div>
-                <div class="month-box"><label>4月</label><input type="number" id="fubon4" placeholder="-"></div>
-                <div class="month-box"><label>5月</label><input type="number" id="fubon5" placeholder="-"></div>
-                <div class="month-box"><label>6月</label><input type="number" id="fubon6" placeholder="-"></div>
+                <div class="month-box"><label>1月</label><input type="number" id="fubon1" placeholder="0"></div>
+                <div class="month-box"><label>2月</label><input type="number" id="fubon2" placeholder="0"></div>
+                <div class="month-box"><label>3月</label><input type="number" id="fubon3" placeholder="0"></div>
+                <div class="month-box"><label>4月</label><input type="number" id="fubon4" placeholder="0"></div>
+                <div class="month-box"><label>5月</label><input type="number" id="fubon5" placeholder="0"></div>
+                <div class="month-box"><label>6月</label><input type="number" id="fubon6" placeholder="0"></div>
             </div>
             <div class="remain-area">
                 <div class="remain-label">目前剩餘欠款</div>
