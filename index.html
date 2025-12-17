@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taffi 家的財務指揮中心 3.1 (互動版)</title>
+    <title>Taffi 財務指揮中心 3.2 (直覺版)</title>
     <style>
+        /* --- 基礎設定 --- */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f7f6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
         h1 { text-align: center; color: #2c3e50; font-size: 1.6rem; margin-bottom: 5px; }
         .subtitle { text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 25px; }
@@ -12,11 +13,14 @@
         .card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
         h2 { font-size: 1.2rem; color: #4a90e2; margin-top: 0; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 20px; }
         
-        /* --- 收入與其他區塊樣式 (維持不變) --- */
+        /* --- 通用輸入框樣式 --- */
+        input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 1.1rem; box-sizing: border-box; text-align: center; transition: border 0.3s; background: #fafafa; }
+        input[type="number"]:focus { border-color: #4a90e2; background: #fff; outline: none; }
+        label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 5px; font-weight: bold; }
+
+        /* --- Step 1: 收入區塊 --- */
         .income-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .income-item label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 5px; font-weight: bold; }
-        .income-item input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; text-align: center; }
-        .total-income { background-color: #e3f2fd; color: #1565c0; padding: 10px; text-align: center; border-radius: 8px; font-weight: bold; font-size: 1.1rem; margin-top: 10px; }
+        .total-income { background-color: #e3f2fd; color: #1565c0; padding: 12px; text-align: center; border-radius: 8px; font-weight: bold; font-size: 1.1rem; margin-top: 10px; }
         
         .checklist-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px dashed #eee; }
         .checklist-item:last-child { border-bottom: none; }
@@ -24,100 +28,16 @@
         .checklist-text { flex-grow: 1; font-size: 1rem; }
         .checklist-amt { color: #555; font-weight: bold; }
 
-        .input-group { margin-bottom: 15px; }
-        .input-label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95rem; display: flex; justify-content: space-between; }
-        .budget-hint { color: #aaa; font-weight: normal; font-size: 0.85rem; }
+        /* --- Step 2: 支出盈餘區塊 (修復版) --- */
+        .expense-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .expense-item { background: #f9f9f9; padding: 10px; border-radius: 8px; border: 1px solid #eee; }
+        .budget-hint { font-size: 0.8rem; color: #999; font-weight: normal; float: right; }
         
-        /* --- 新版：銀行 Tab 樣式 --- */
-        .bank-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: bold;
-            color: #666;
-            background-color: #f0f2f5;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .tab-btn.active { color: white; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
-        
-        /* 各銀行主題色 */
-        .tab-btn[data-bank="cathay"].active { background-color: #27ae60; }
-        .tab-btn[data-bank="taishin"].active { background-color: #e74c3c; }
-        .tab-btn[data-bank="fubon"].active { background-color: #2980b9; }
+        button.calc-btn { width: 100%; background-color: #2c3e50; color: white; border: none; padding: 16px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        button.calc-btn:hover { background-color: #1a252f; transform: translateY(-1px); }
 
-        /* 銀行內容面板 */
-        .bank-panel { display: none; animation: fadeIn 0.3s; }
-        .bank-panel.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        .debt-header { margin-bottom: 15px; }
-        .debt-header label { display: block; font-size: 0.85rem; color: #888; margin-bottom: 5px; }
-        .debt-header input { width: 100%; padding: 12px; font-size: 1.2rem; border: 1px solid #ddd; border-radius: 8px; font-weight: bold; color: #333; }
-
-        /* 橫向月份按鈕 */
-        .months-row { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); /* 一列三個 */
-            gap: 10px; 
-            margin-bottom: 20px; 
-        }
-        .month-btn {
-            background: #fafafa;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            padding: 15px 5px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-        }
-        .month-btn:hover { background: #f0f0f0; }
-        
-        .month-name { display: block; font-size: 0.9rem; color: #888; margin-bottom: 5px; }
-        .month-val { display: block; font-size: 1rem; font-weight: bold; color: #333; min-height: 1.2rem;}
-        
-        /* 已付款狀態 */
-        .month-btn.paid { background-color: #e8f5e9; border-color: #a5d6a7; }
-        .month-btn.paid .month-name { color: #2e7d32; }
-        .month-btn.paid .month-val { color: #1b5e20; }
-
-        /* 底部剩餘金額顯示 */
-        .remain-area {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            border-top: 2px dashed #ddd;
-        }
-        .remain-label { font-size: 0.9rem; color: #666; margin-bottom: 5px; }
-        .remain-amount { font-size: 1.8rem; font-weight: 800; color: #2c3e50; }
-
-        /* --- 彈出視窗 (Modal) --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5); z-index: 100;
-            display: none; justify-content: center; align-items: center;
-        }
-        .modal-content {
-            background: white; padding: 25px; border-radius: 16px; width: 80%; max-width: 320px;
-            text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            animation: popIn 0.2s;
-        }
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
-        .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; }
-        .modal-input { width: 100%; padding: 12px; font-size: 1.5rem; text-align: center; border: 2px solid #4a90e2; border-radius: 8px; margin-bottom: 20px; box-sizing: border-box; }
-        .modal-btns { display: flex; gap: 10px; }
-        .modal-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; }
-        .btn-cancel { background: #f0f0f0; color: #666; }
-        .btn-confirm { background: #2c3e50; color: white; }
-
-        /* 結果區 */
-        #resultArea { display: none; background-color: #fff; border: 2px solid #4a90e2; }
+        /* 結果顯示區 */
+        #resultArea { display: none; border: 2px solid #4a90e2; background-color: #fff; }
         .result-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 1.1rem; align-items: center; }
         .highlight { color: #2e7d32; font-weight: bold; font-size: 1.2rem; }
         .taffi-highlight { color: #d81b60; font-weight: bold; font-size: 1.2rem; }
@@ -125,35 +45,54 @@
         .tag { font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; margin-left: 5px; vertical-align: middle; }
         .tag-taffi { background-color: #fce4ec; color: #c2185b; }
         .tag-em { background-color: #e8f5e9; color: #2e7d32; }
-        button.calc-btn { width: 100%; background-color: #2c3e50; color: white; border: none; padding: 16px; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        button.calc-btn:hover { background-color: #1a252f; transform: translateY(-1px); }
+
+        /* --- Step 3: 債務區塊 (Tab + 直接輸入) --- */
+        .bank-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: bold; color: #666; background-color: #f0f2f5; cursor: pointer; transition: all 0.2s; }
+        .tab-btn.active { color: white; transform: translateY(-2px); box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
+        
+        /* 銀行顏色 */
+        .tab-btn[data-bank="cathay"].active { background-color: #27ae60; }
+        .tab-btn[data-bank="taishin"].active { background-color: #e74c3c; }
+        .tab-btn[data-bank="fubon"].active { background-color: #2980b9; }
+
+        /* 銀行內容面板 */
+        .bank-panel { display: none; }
+        .bank-panel.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .debt-header { margin-bottom: 15px; }
+        .debt-header input { font-size: 1.3rem; font-weight: bold; color: #333; padding: 12px; }
+
+        /* 月份直接輸入網格 */
+        .months-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .month-box { background: white; border: 1px solid #eee; border-radius: 8px; padding: 8px; text-align: center; }
+        .month-box label { font-size: 0.8rem; margin-bottom: 4px; color: #888; }
+        .month-box input { font-size: 1rem; padding: 8px; height: auto; }
+        .month-box input:not(:placeholder-shown) { background-color: #e8f5e9; border-color: #a5d6a7; color: #1b5e20; font-weight: bold; }
+
+        /* 底部剩餘金額 */
+        .remain-area { background-color: #f8f9fa; border-radius: 10px; padding: 15px; text-align: center; border-top: 2px dashed #ddd; }
+        .remain-label { font-size: 0.9rem; color: #666; margin-bottom: 5px; }
+        .remain-amount { font-size: 1.8rem; font-weight: 800; color: #2c3e50; }
 
     </style>
 </head>
 <body>
 
-    <h1>💰 財務指揮中心 3.1</h1>
-    <p class="subtitle">收入分配・債務追蹤・盈餘結算</p>
+    <h1>💰 財務指揮中心 3.2</h1>
+    <p class="subtitle">收入 -> 結算 -> 還債 (完美動線版)</p>
 
     <div class="card">
         <h2>Step 1：月初收入與分配</h2>
         <div class="income-grid">
-            <div class="income-item">
-                <label>底薪</label>
-                <input type="number" id="salaryBase" value="45000" oninput="calcTotalIncome()">
-            </div>
-            <div class="income-item">
-                <label>獎金</label>
-                <input type="number" id="salaryBonus" value="0" placeholder="0" oninput="calcTotalIncome()">
-            </div>
-            <div class="income-item">
-                <label>攝影棚</label>
-                <input type="number" id="salaryStudio" value="0" placeholder="0" oninput="calcTotalIncome()">
-            </div>
+            <div><label>底薪</label><input type="number" id="salaryBase" value="45000"></div>
+            <div><label>獎金</label><input type="number" id="salaryBonus" placeholder="0"></div>
+            <div><label>攝影棚</label><input type="number" id="salaryStudio" placeholder="0"></div>
         </div>
-        <div class="total-income" id="totalIncomeDisplay">本月總收入：$45,000</div>
+        <div class="total-income" id="totalIncomeDisplay">總收入：$45,000</div>
         
-        <p style="font-size: 0.9rem; color: #666; margin-top: 20px;">請確認以下資金已轉入/保留：</p>
+        <p style="font-size: 0.85rem; color: #666; margin-top: 20px; border-bottom: 1px solid #eee; padding-bottom: 5px;">固定扣款確認：</p>
         <div class="checklist-item"><input type="checkbox" id="check1"><div class="checklist-text">🏠 房貸 (給爸媽)</div><div class="checklist-amt">$15,000</div></div>
         <div class="checklist-item"><input type="checkbox" id="check2"><div class="checklist-text">✈️ 旅遊基金</div><div class="checklist-amt">$6,000</div></div>
         <div class="checklist-item"><input type="checkbox" id="check3"><div class="checklist-text">🚨 緊急預備金</div><div class="checklist-amt">$3,000</div></div>
@@ -162,82 +101,28 @@
     </div>
 
     <div class="card">
-        <h2>💳 債務雪球追蹤</h2>
-        
-        <div class="bank-tabs">
-            <button class="tab-btn active" data-bank="cathay" onclick="switchBank('cathay')">國泰銀行</button>
-            <button class="tab-btn" data-bank="taishin" onclick="switchBank('taishin')">台新銀行</button>
-            <button class="tab-btn" data-bank="fubon" onclick="switchBank('fubon')">富邦銀行</button>
-        </div>
-
-        <div id="cathay-panel" class="bank-panel active">
-            <div class="debt-header">
-                <label>初始總債務 (截至12月底)</label>
-                <input type="number" id="cathayTotal" placeholder="輸入總欠款" oninput="updateUI()">
-            </div>
-            <div class="months-row" id="cathay-months">
-                </div>
-            <div class="remain-area">
-                <div class="remain-label">目前剩餘欠款</div>
-                <div class="remain-amount" id="cathayRemain">$0</div>
-            </div>
-        </div>
-
-        <div id="taishin-panel" class="bank-panel">
-            <div class="debt-header">
-                <label>初始總債務 (截至12月底)</label>
-                <input type="number" id="taishinTotal" placeholder="輸入總欠款" oninput="updateUI()">
-            </div>
-            <div class="months-row" id="taishin-months"></div>
-            <div class="remain-area">
-                <div class="remain-label">目前剩餘欠款</div>
-                <div class="remain-amount" id="taishinRemain">$0</div>
-            </div>
-        </div>
-
-        <div id="fubon-panel" class="bank-panel">
-            <div class="debt-header">
-                <label>初始總債務 (截至12月底)</label>
-                <input type="number" id="fubonTotal" placeholder="輸入總欠款" oninput="updateUI()">
-            </div>
-            <div class="months-row" id="fubon-months"></div>
-            <div class="remain-area">
-                <div class="remain-label">目前剩餘欠款</div>
-                <div class="remain-amount" id="fubonRemain">$0</div>
-            </div>
-        </div>
-
-        <div style="display:none;">
-            <input type="hidden" id="cathay1"><input type="hidden" id="cathay2">
-            <input type="hidden" id="cathay3"><input type="hidden" id="cathay4">
-            <input type="hidden" id="cathay5"><input type="hidden" id="cathay6">
-            <input type="hidden" id="taishin1"><input type="hidden" id="taishin2">
-            <input type="hidden" id="taishin3"><input type="hidden" id="taishin4">
-            <input type="hidden" id="taishin5"><input type="hidden" id="taishin6">
-            <input type="hidden" id="fubon1"><input type="hidden" id="fubon2">
-            <input type="hidden" id="fubon3"><input type="hidden" id="fubon4">
-            <input type="hidden" id="fubon5"><input type="hidden" id="fubon6">
-        </div>
-    </div>
-
-    <div class="card">
         <h2>Step 2：月底結算盈餘</h2>
-        <div class="input-group">
-            <label class="input-label">🐶 狗狗支出 <span class="budget-hint">/ 2,950</span></label>
-            <input type="number" id="spentDog" placeholder="輸入花費">
+        <p style="font-size: 0.85rem; color: #888; margin-bottom: 15px;">輸入本月實際花費：</p>
+        
+        <div class="expense-grid">
+            <div class="expense-item">
+                <label>🐶 狗狗 <span class="budget-hint">/ 2,950</span></label>
+                <input type="number" id="spentDog" placeholder="花費">
+            </div>
+            <div class="expense-item">
+                <label>🍱 餐飲 <span class="budget-hint">/ 8,000</span></label>
+                <input type="number" id="spentFood" placeholder="花費">
+            </div>
+            <div class="expense-item">
+                <label>🛍️ 購物 <span class="budget-hint">/ 1,700</span></label>
+                <input type="number" id="spentShop" placeholder="花費">
+            </div>
+            <div class="expense-item">
+                <label>🎬 娛樂 <span class="budget-hint">/ 500</span></label>
+                <input type="number" id="spentEnt" placeholder="花費">
+            </div>
         </div>
-        <div class="input-group">
-            <label class="input-label">🍱 餐飲費用 <span class="budget-hint">/ 8,000</span></label>
-            <input type="number" id="spentFood" placeholder="輸入花費">
-        </div>
-        <div class="input-group">
-            <label class="input-label">🛍️ 購物費用 <span class="budget-hint">/ 1,700</span></label>
-            <input type="number" id="spentShop" placeholder="輸入花費">
-        </div>
-        <div class="input-group">
-            <label class="input-label">🎬 其他娛樂 <span class="budget-hint">/ 500</span></label>
-            <input type="number" id="spentEnt" placeholder="輸入花費">
-        </div>
+
         <button class="calc-btn" onclick="calculate()">🚀 計算本月要存多少錢</button>
     </div>
 
@@ -258,141 +143,86 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="paymentModal">
-        <div class="modal-content">
-            <div class="modal-title" id="modalTitle">輸入還款金額</div>
-            <input type="number" id="modalInput" class="modal-input" placeholder="$0">
-            <div class="modal-btns">
-                <button class="modal-btn btn-cancel" onclick="closeModal()">取消</button>
-                <button class="modal-btn btn-confirm" onclick="confirmPayment()">確定</button>
+    <div class="card">
+        <h2>Step 3：債務雪球追蹤</h2>
+        
+        <div class="bank-tabs">
+            <button class="tab-btn active" data-bank="cathay" onclick="switchBank('cathay')">國泰銀行</button>
+            <button class="tab-btn" data-bank="taishin" onclick="switchBank('taishin')">台新銀行</button>
+            <button class="tab-btn" data-bank="fubon" onclick="switchBank('fubon')">富邦銀行</button>
+        </div>
+
+        <div id="cathay-panel" class="bank-panel active">
+            <div class="debt-header">
+                <label>初始總債務 (截至12月底)</label>
+                <input type="number" id="cathayTotal" placeholder="輸入總欠款">
+            </div>
+            <div class="months-grid">
+                <div class="month-box"><label>1月</label><input type="number" id="cathay1" placeholder="-"></div>
+                <div class="month-box"><label>2月</label><input type="number" id="cathay2" placeholder="-"></div>
+                <div class="month-box"><label>3月</label><input type="number" id="cathay3" placeholder="-"></div>
+                <div class="month-box"><label>4月</label><input type="number" id="cathay4" placeholder="-"></div>
+                <div class="month-box"><label>5月</label><input type="number" id="cathay5" placeholder="-"></div>
+                <div class="month-box"><label>6月</label><input type="number" id="cathay6" placeholder="-"></div>
+            </div>
+            <div class="remain-area">
+                <div class="remain-label">目前剩餘欠款</div>
+                <div class="remain-amount" id="cathayRemain">$0</div>
+            </div>
+        </div>
+
+        <div id="taishin-panel" class="bank-panel">
+            <div class="debt-header">
+                <label>初始總債務 (截至12月底)</label>
+                <input type="number" id="taishinTotal" placeholder="輸入總欠款">
+            </div>
+            <div class="months-grid">
+                <div class="month-box"><label>1月</label><input type="number" id="taishin1" placeholder="-"></div>
+                <div class="month-box"><label>2月</label><input type="number" id="taishin2" placeholder="-"></div>
+                <div class="month-box"><label>3月</label><input type="number" id="taishin3" placeholder="-"></div>
+                <div class="month-box"><label>4月</label><input type="number" id="taishin4" placeholder="-"></div>
+                <div class="month-box"><label>5月</label><input type="number" id="taishin5" placeholder="-"></div>
+                <div class="month-box"><label>6月</label><input type="number" id="taishin6" placeholder="-"></div>
+            </div>
+            <div class="remain-area">
+                <div class="remain-label">目前剩餘欠款</div>
+                <div class="remain-amount" id="taishinRemain">$0</div>
+            </div>
+        </div>
+
+        <div id="fubon-panel" class="bank-panel">
+            <div class="debt-header">
+                <label>初始總債務 (截至12月底)</label>
+                <input type="number" id="fubonTotal" placeholder="輸入總欠款">
+            </div>
+            <div class="months-grid">
+                <div class="month-box"><label>1月</label><input type="number" id="fubon1" placeholder="-"></div>
+                <div class="month-box"><label>2月</label><input type="number" id="fubon2" placeholder="-"></div>
+                <div class="month-box"><label>3月</label><input type="number" id="fubon3" placeholder="-"></div>
+                <div class="month-box"><label>4月</label><input type="number" id="fubon4" placeholder="-"></div>
+                <div class="month-box"><label>5月</label><input type="number" id="fubon5" placeholder="-"></div>
+                <div class="month-box"><label>6月</label><input type="number" id="fubon6" placeholder="-"></div>
+            </div>
+            <div class="remain-area">
+                <div class="remain-label">目前剩餘欠款</div>
+                <div class="remain-amount" id="fubonRemain">$0</div>
             </div>
         </div>
     </div>
 
     <script>
-        let currentBank = '';
-        let currentMonthIdx = 0;
-
+        // --- 核心功能：自動儲存與計算 ---
+        
         window.onload = function() {
-            initMonthButtons();
             loadAllData();
         };
 
-        // --- 初始化：產生月份按鈕 ---
-        function initMonthButtons() {
-            const banks = ['cathay', 'taishin', 'fubon'];
-            banks.forEach(bank => {
-                const container = document.getElementById(bank + '-months');
-                container.innerHTML = '';
-                for (let i = 1; i <= 6; i++) {
-                    // 建立按鈕
-                    const btn = document.createElement('div');
-                    btn.className = 'month-btn';
-                    btn.id = `btn-${bank}${i}`; // 每個按鈕有獨立 ID
-                    btn.onclick = () => openModal(bank, i);
-                    
-                    // 內容
-                    btn.innerHTML = `
-                        <span class="month-name">${i}月</span>
-                        <span class="month-val" id="disp-${bank}${i}">-</span>
-                    `;
-                    container.appendChild(btn);
-                }
-            });
-        }
-
-        // --- 介面操作：切換銀行 ---
-        function switchBank(bankName) {
-            // 處理 Tab 樣式
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`.tab-btn[data-bank="${bankName}"]`).classList.add('active');
-
-            // 處理面板顯示
-            document.querySelectorAll('.bank-panel').forEach(panel => panel.classList.remove('active'));
-            document.getElementById(bankName + '-panel').classList.add('active');
-        }
-
-        // --- 彈出視窗操作 ---
-        function openModal(bank, month) {
-            currentBank = bank;
-            currentMonthIdx = month;
-            
-            // 讀取目前隱藏欄位的值
-            const existingVal = document.getElementById(`${bank}${month}`).value;
-            
-            document.getElementById('modalTitle').innerText = `${month}月還款金額`;
-            document.getElementById('modalInput').value = existingVal;
-            document.getElementById('paymentModal').style.display = 'flex';
-            document.getElementById('modalInput').focus();
-        }
-
-        function closeModal() {
-            document.getElementById('paymentModal').style.display = 'none';
-        }
-
-        function confirmPayment() {
-            const val = document.getElementById('modalInput').value;
-            // 寫入隱藏欄位 (這會觸發 saveAllData, 透過手動呼叫)
-            const hiddenInput = document.getElementById(`${currentBank}${currentMonthIdx}`);
-            hiddenInput.value = val;
-            
-            closeModal();
-            saveAllData(); // 儲存
-            updateUI();    // 更新畫面 (按鈕變色 & 餘額計算)
-        }
-
-        // --- 核心邏輯：更新畫面顯示 ---
-        function updateUI() {
-            const banks = ['cathay', 'taishin', 'fubon'];
-            
-            banks.forEach(bank => {
-                let totalDebt = Number(document.getElementById(bank + 'Total').value) || 0;
-                let paidTotal = 0;
-
-                for(let i=1; i<=6; i++) {
-                    const val = document.getElementById(`${bank}${i}`).value;
-                    const numVal = Number(val);
-                    const btn = document.getElementById(`btn-${bank}${i}`);
-                    const disp = document.getElementById(`disp-${bank}${i}`);
-
-                    if(numVal > 0) {
-                        btn.classList.add('paid');
-                        disp.innerText = "$" + numVal.toLocaleString();
-                        paidTotal += numVal;
-                    } else {
-                        btn.classList.remove('paid');
-                        disp.innerText = "-";
-                    }
-                }
-
-                let remain = totalDebt - paidTotal;
-                document.getElementById(bank + 'Remain').innerText = "$" + remain.toLocaleString();
-            });
-        }
-
-        // --- 自動儲存系統 ---
-        function saveAllData() {
-            const inputs = document.querySelectorAll('input'); 
-            const data = {};
-            
-            inputs.forEach(input => {
-                if (input.id) { 
-                    if (input.type === 'checkbox') {
-                        data[input.id] = input.checked;
-                    } else {
-                        data[input.id] = input.value;
-                    }
-                }
-            });
-            localStorage.setItem('taffiFinanceFullData_v2', JSON.stringify(data));
-        }
-
+        // 1. 讀取資料
         function loadAllData() {
-            const saved = localStorage.getItem('taffiFinanceFullData_v2');
+            const saved = localStorage.getItem('taffiFinanceV3_2');
             if (saved) {
                 const data = JSON.parse(saved);
                 const inputs = document.querySelectorAll('input');
-                
                 inputs.forEach(input => {
                     if (input.id && data.hasOwnProperty(input.id)) {
                         if (input.type === 'checkbox') {
@@ -404,27 +234,49 @@
                 });
             }
             
-            // 綁定所有輸入框變更事件 (自動儲存)
+            // 綁定監聽器：只要有變動，馬上儲存並計算
             const allInputs = document.querySelectorAll('input');
             allInputs.forEach(input => {
-                input.addEventListener('input', () => { saveAllData(); updateUI(); }); // 加入 updateUI 確保總債務變更時會重算
-                input.addEventListener('change', () => { saveAllData(); updateUI(); });
+                input.addEventListener('input', () => { saveAllData(); refreshAll(); });
+                input.addEventListener('change', () => { saveAllData(); refreshAll(); });
             });
 
-            // 載入完畢後，更新收入顯示和債務 UI
-            calcTotalIncome();
-            updateUI();
+            refreshAll(); // 初始載入時計算一次
         }
 
-        // --- 收入與結算邏輯 (舊功能) ---
-        function calcTotalIncome() {
+        // 2. 儲存資料
+        function saveAllData() {
+            const inputs = document.querySelectorAll('input'); 
+            const data = {};
+            inputs.forEach(input => {
+                if (input.id) {
+                    data[input.id] = (input.type === 'checkbox') ? input.checked : input.value;
+                }
+            });
+            localStorage.setItem('taffiFinanceV3_2', JSON.stringify(data));
+        }
+
+        // 3. 統整計算 (收入 & 債務)
+        function refreshAll() {
+            // 計算收入
             let base = Number(document.getElementById('salaryBase').value) || 0;
             let bonus = Number(document.getElementById('salaryBonus').value) || 0;
             let studio = Number(document.getElementById('salaryStudio').value) || 0;
-            let total = base + bonus + studio;
-            document.getElementById('totalIncomeDisplay').innerText = "本月總收入：$" + total.toLocaleString();
+            let totalIncome = base + bonus + studio;
+            document.getElementById('totalIncomeDisplay').innerText = "總收入：$" + totalIncome.toLocaleString();
+
+            // 計算債務
+            ['cathay', 'taishin', 'fubon'].forEach(bank => {
+                let totalDebt = Number(document.getElementById(bank + 'Total').value) || 0;
+                let paid = 0;
+                for(let i=1; i<=6; i++) {
+                    paid += Number(document.getElementById(`${bank}${i}`).value) || 0;
+                }
+                document.getElementById(bank + 'Remain').innerText = "$" + (totalDebt - paid).toLocaleString();
+            });
         }
 
+        // 4. 結算按鈕邏輯 (Step 2)
         function calculate() {
             const budgetDog = 2950;
             const budgetFood = 8000;
@@ -454,6 +306,16 @@
             document.getElementById('resultArea').style.display = 'block';
             document.getElementById('resultArea').scrollIntoView({behavior: "smooth"});
         }
+
+        // 5. 切換銀行 Tab
+        function switchBank(bankName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.tab-btn[data-bank="${bankName}"]`).classList.add('active');
+
+            document.querySelectorAll('.bank-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById(bankName + '-panel').classList.add('active');
+        }
+
     </script>
 </body>
 </html>
